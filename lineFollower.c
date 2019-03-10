@@ -10,6 +10,14 @@ string fileName = "movements.txt";
 void turnToTrack();
 void continueTrack();
 
+bool isBlack() {
+	return abs(SensorValue[lightSensor] - black) <= 2;
+}
+
+bool isWhite() {
+	return abs(SensorValue[lightSensor] - white) <= 2;
+}
+
 void turnLeft(int power) {
 	motor[leftWheel] = -power;
 	motor[rightWheel] = power;
@@ -47,7 +55,7 @@ void writeMotion(int leftWheelSpeed, int rightWheelSpeed, int duration){
 
 void continueTrack() {
 	clearTimer(T1);
-	while(SensorValue[lightSensor] < black) {
+	while(isBlack()) {
 		goStraight(50);
 	}
 	int motionTime = time1[T1];
@@ -61,19 +69,19 @@ void turnToTrack() {
 	int tick = 0;
 	clearTimer(T1);
 	// Check left turn first for number of ticks
-	while(SensorValue[lightSensor] > black || tick < 50) {
+	while(isWhite() || tick < 50) {
 		turnLeft(50);
 		tick = tick + 1;
 	}
 	// If left turn worked, record in txt file and continue on path
 	int leftMotionTime = time1[T1];
-	if (SensorValue[lightSensor] <= black) {
+	if (isBlack()) {
 		writeMotion(-50, 50, leftMotionTime);
 		continueTrack();
 	}
 	// Else, we use a right turn and record that instead
 	clearTimer(T1);
-	while(SensorValue[lightSensor] > black) {
+	while(isWhite()) {
 		turnRight(50);
 	}
 	// Subtract left motion time to compensate for left turn adding time
